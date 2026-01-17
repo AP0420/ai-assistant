@@ -10,7 +10,59 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
 </head>
 <body>
-    <div class="container">
+    <!-- Setup Screen (Shown only on first visit) -->
+    <div id="setupScreen" class="setup-screen">
+        <div class="setup-container">
+            <div class="setup-header">
+                <div class="setup-logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="logo-text">Atlas AI</div>
+                </div>
+                <h1>Welcome to Atlas AI</h1>
+                <p>Your self-learning personal assistant</p>
+            </div>
+            
+            <div class="setup-progress">
+                <div class="progress-step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-text">Setup Profile</div>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-text">Connect WhatsApp</div>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-text">Add Contacts</div>
+                </div>
+                <div class="progress-step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-text">Preferences</div>
+                </div>
+            </div>
+            
+            <div class="setup-content" id="setupContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+            
+            <div class="setup-footer">
+                <button id="prevBtn" class="btn btn-secondary" onclick="prevStep()" style="display: none;">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button id="nextBtn" class="btn btn-primary" onclick="nextStep()">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+                <button id="finishBtn" class="btn btn-success" onclick="finishSetup()" style="display: none;">
+                    <i class="fas fa-rocket"></i> Launch Atlas AI
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (Hidden until setup is complete) -->
+    <div id="mainApp" class="container" style="display: none;">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -21,9 +73,14 @@
                     <div class="logo-text">Atlas AI</div>
                 </div>
                 
-                <div class="status-indicator">
-                    <div class="status-dot"></div>
-                    <span>Learning Mode Active</span>
+                <div class="header-controls">
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>Learning Mode Active</span>
+                    </div>
+                    <button class="btn-icon" onclick="openSettings()" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
                 </div>
             </div>
         </header>
@@ -63,19 +120,29 @@
                 </div>
                 
                 <div class="sidebar-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-users"></i>
-                        Frequent Contacts
-                    </h3>
+                    <div class="section-header">
+                        <h3 class="section-title">
+                            <i class="fas fa-users"></i>
+                            My Contacts
+                        </h3>
+                        <button class="btn-icon-small" onclick="openAddContactModal()" title="Add Contact">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
                     <ul class="contacts-list" id="contactsList">
                         <!-- Contacts will be populated here -->
+                        <div class="empty-state">
+                            <i class="fas fa-user-plus"></i>
+                            <p>No contacts yet</p>
+                            <button class="btn-text" onclick="openAddContactModal()">Add your first contact</button>
+                        </div>
                     </ul>
                 </div>
                 
                 <div class="sidebar-section">
                     <h3 class="section-title">
                         <i class="fas fa-bolt"></i>
-                        Quick Tasks
+                        Quick Actions
                     </h3>
                     <div class="quick-tasks">
                         <button class="input-action" onclick="quickTask('weather')">
@@ -84,8 +151,8 @@
                         <button class="input-action" onclick="quickTask('news')">
                             <i class="fas fa-newspaper"></i> Latest News
                         </button>
-                        <button class="input-action" onclick="quickTask('schedule')">
-                            <i class="fas fa-calendar"></i> Today's Schedule
+                        <button class="input-action" onclick="openReminderModal()">
+                            <i class="fas fa-calendar-plus"></i> Add Reminder
                         </button>
                     </div>
                 </div>
@@ -95,8 +162,8 @@
             <main class="chat-container">
                 <div class="chat-header">
                     <div>
-                        <h1 class="chat-title">Atlas AI Assistant</h1>
-                        <p class="chat-subtitle">I learn from every conversation. Try saying: "Send WhatsApp to John" or "Remind me to call mom"</p>
+                        <h1 class="chat-title" id="assistantNameDisplay">Atlas AI</h1>
+                        <p class="chat-subtitle">I learn from every conversation. Try saying: "Send WhatsApp to [contact]" or "Remind me to..."</p>
                     </div>
                     
                     <div class="voice-controls">
@@ -123,8 +190,8 @@
                         <button class="input-action" onclick="openLearningModal()">
                             <i class="fas fa-graduation-cap"></i> Teach Me
                         </button>
-                        <button class="input-action" onclick="openSettingsModal()">
-                            <i class="fas fa-cog"></i> Settings
+                        <button class="input-action" onclick="openQuickActions()">
+                            <i class="fas fa-bolt"></i> Quick Actions
                         </button>
                         <button class="input-action" onclick="clearChat()">
                             <i class="fas fa-trash"></i> Clear Chat
@@ -153,29 +220,39 @@
                     </div>
                 </div>
                 
-                <h3 class="section-title">
-                    <i class="fas fa-lightbulb"></i>
-                    Recently Learned
-                </h3>
-                <ul class="knowledge-list" id="knowledgeList">
-                    <!-- Learned items will appear here -->
-                </ul>
+                <div class="panel-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-lightbulb"></i>
+                        Recently Learned
+                    </h3>
+                    <ul class="knowledge-list" id="knowledgeList">
+                        <div class="empty-state small">
+                            <i class="fas fa-lightbulb"></i>
+                            <p>I'll learn from our conversations</p>
+                        </div>
+                    </ul>
+                </div>
                 
-                <h3 class="section-title">
-                    <i class="fas fa-bell"></i>
-                    Upcoming Reminders
-                </h3>
-                <ul class="reminders-list" id="remindersList">
-                    <!-- Reminders will appear here -->
-                </ul>
+                <div class="panel-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-bell"></i>
+                        Upcoming Reminders
+                    </h3>
+                    <ul class="reminders-list" id="remindersList">
+                        <div class="empty-state small">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>No upcoming reminders</p>
+                        </div>
+                    </ul>
+                </div>
             </aside>
         </div>
 
         <!-- Footer -->
         <footer class="footer">
             <div class="container">
-                <p>Atlas AI | Self-Learning Personal Assistant | v2.5.1</p>
-                <p>Voice recognition active • Learning mode: ON • Last updated: Just now</p>
+                <p><span id="footerAssistantName">Atlas AI</span> | Self-Learning Personal Assistant | v2.5.1</p>
+                <p>WhatsApp: <span id="whatsappStatus">Ready</span> • Learning mode: ON</p>
             </div>
         </footer>
     </div>
@@ -187,26 +264,117 @@
                 <h2 class="modal-title">Send WhatsApp Message</h2>
                 <button class="close-modal" onclick="closeModal('whatsappModal')">&times;</button>
             </div>
+            
+            <div class="modal-body">
+                <div class="whatsapp-guide" id="whatsappGuide">
+                    <div class="guide-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Open WhatsApp Web</h4>
+                            <p>Make sure you have WhatsApp Web open in your browser</p>
+                            <button class="btn btn-secondary" onclick="openWhatsAppWeb()">
+                                <i class="fab fa-whatsapp"></i> Open WhatsApp Web
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Select Contact</h4>
+                            <div class="form-group">
+                                <label class="form-label">Choose a contact</label>
+                                <select class="form-input" id="whatsappContact">
+                                    <option value="">Select a contact</option>
+                                </select>
+                                <p class="form-hint">Or type a new number</p>
+                                <input type="text" class="form-input" id="whatsappNewContact" placeholder="+1234567890">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="guide-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Compose Message</h4>
+                            <div class="form-group">
+                                <label class="form-label">Message</label>
+                                <textarea class="form-input" id="whatsappMessage" rows="4" placeholder="Type your message..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Schedule Send (Optional)</label>
+                                <input type="datetime-local" class="form-input" id="whatsappSchedule">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="whatsapp-preview" id="whatsappPreview" style="display: none;">
+                    <h4>Message Preview</h4>
+                    <div class="preview-container">
+                        <div class="whatsapp-message-preview">
+                            <div class="message-header">
+                                <div class="contact-avatar-small">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <div class="contact-name" id="previewContactName">Contact Name</div>
+                                    <div class="contact-number" id="previewContactNumber">+1234567890</div>
+                                </div>
+                            </div>
+                            <div class="message-content-preview">
+                                <p id="previewMessageText">Your message will appear here</p>
+                                <div class="message-time-preview" id="previewMessageTime">Now</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('whatsappModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="prepareWhatsAppMessage()" id="prepareWhatsAppBtn">
+                    <i class="fab fa-whatsapp"></i> Prepare Message
+                </button>
+                <button class="btn btn-success" onclick="sendWhatsAppMessage()" id="sendWhatsAppBtn" style="display: none;">
+                    <i class="fab fa-whatsapp"></i> Open in WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Contact Modal -->
+    <div class="modal" id="addContactModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New Contact</h2>
+                <button class="close-modal" onclick="closeModal('addContactModal')">&times;</button>
+            </div>
             <div class="form-group">
-                <label class="form-label">Select Contact</label>
-                <select class="form-input" id="whatsappContact">
-                    <option value="john">John Doe (Favorite)</option>
-                    <option value="sarah">Sarah Smith (Work)</option>
-                    <option value="mike">Mike Johnson</option>
-                    <option value="emily">Emily Davis (Family)</option>
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-input" id="contactName" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone Number (with country code)</label>
+                <input type="text" class="form-input" id="contactPhone" placeholder="+1234567890">
+                <p class="form-hint">Format: +[country code][number]</p>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-input" id="contactCategory">
+                    <option value="family">Family</option>
+                    <option value="friends">Friends</option>
+                    <option value="work">Work</option>
+                    <option value="other">Other</option>
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Message</label>
-                <textarea class="form-input" id="whatsappMessage" rows="4" placeholder="Type your message..."></textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Schedule Send</label>
-                <input type="datetime-local" class="form-input" id="whatsappSchedule">
+                <label class="form-label">Notes (Optional)</label>
+                <textarea class="form-input" id="contactNotes" rows="2" placeholder="Any additional information..."></textarea>
             </div>
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal('whatsappModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="sendWhatsApp()">Send Message</button>
+                <button class="btn btn-secondary" onclick="closeModal('addContactModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveContact()">Save Contact</button>
             </div>
         </div>
     </div>
@@ -285,38 +453,98 @@
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">AI Assistant Settings</h2>
+                <h2 class="modal-title">Settings</h2>
                 <button class="close-modal" onclick="closeModal('settingsModal')">&times;</button>
             </div>
-            <div class="form-group">
-                <label class="form-label">Assistant Name</label>
-                <input type="text" class="form-input" id="assistantName" value="Atlas AI">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab('generalTab')">General</button>
+                <button class="tab-btn" onclick="openTab('whatsappTab')">WhatsApp</button>
+                <button class="tab-btn" onclick="openTab('learningTab')">Learning</button>
+                <button class="tab-btn" onclick="openTab('backupTab')">Backup</button>
             </div>
-            <div class="form-group">
-                <label class="form-label">Learning Sensitivity</label>
-                <select class="form-input" id="learningSensitivity">
-                    <option value="low">Low (Learn only when taught)</option>
-                    <option value="medium" selected>Medium (Learn from patterns)</option>
-                    <option value="high">High (Learn from everything)</option>
-                </select>
+            
+            <div class="tab-content active" id="generalTab">
+                <div class="form-group">
+                    <label class="form-label">Assistant Name</label>
+                    <input type="text" class="form-input" id="assistantName" value="Atlas AI">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-input" id="userName" placeholder="Enter your name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Theme</label>
+                    <select class="form-input" id="themeSelect">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                        <option value="auto">Auto (System)</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Voice Response</label>
-                <select class="form-input" id="voiceResponse">
-                    <option value="on">Enabled</option>
-                    <option value="off">Disabled</option>
-                </select>
+            
+            <div class="tab-content" id="whatsappTab">
+                <div class="form-group">
+                    <label class="form-label">WhatsApp Web URL</label>
+                    <input type="text" class="form-input" id="whatsappWebUrl" value="https://web.whatsapp.com" placeholder="https://web.whatsapp.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Default Country Code</label>
+                    <input type="text" class="form-input" id="defaultCountryCode" value="+1" placeholder="+1">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoOpenWhatsApp" checked>
+                        <span>Automatically open WhatsApp Web when sending messages</span>
+                    </label>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Theme</label>
-                <select class="form-input" id="themeSelect">
-                    <option value="dark">Dark (Default)</option>
-                    <option value="light">Light</option>
-                    <option value="auto">Auto (System)</option>
-                </select>
+            
+            <div class="tab-content" id="learningTab">
+                <div class="form-group">
+                    <label class="form-label">Learning Sensitivity</label>
+                    <select class="form-input" id="learningSensitivity">
+                        <option value="low">Low (Learn only when taught)</option>
+                        <option value="medium" selected>Medium (Learn from patterns)</option>
+                        <option value="high">High (Learn from everything)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="autoLearn" checked>
+                        <span>Automatically learn from conversations</span>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="saveChatHistory" checked>
+                        <span>Save chat history</span>
+                    </label>
+                </div>
             </div>
+            
+            <div class="tab-content" id="backupTab">
+                <div class="backup-actions">
+                    <button class="btn btn-secondary" onclick="exportData()">
+                        <i class="fas fa-download"></i> Export All Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="importData()">
+                        <i class="fas fa-upload"></i> Import Data
+                    </button>
+                    <button class="btn btn-warning" onclick="resetAllData()">
+                        <i class="fas fa-trash"></i> Reset All Data
+                    </button>
+                </div>
+                <div class="data-info">
+                    <h4>Data Information</h4>
+                    <p>Contacts: <span id="contactCount">0</span></p>
+                    <p>Reminders: <span id="reminderCount">0</span></p>
+                    <p>Knowledge Items: <span id="knowledgeCount">0</span></p>
+                    <p>Chat History: <span id="chatCount">0</span> messages</p>
+                </div>
+            </div>
+            
             <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="resetSettings()">Reset to Default</button>
+                <button class="btn btn-secondary" onclick="closeModal('settingsModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
             </div>
         </div>
