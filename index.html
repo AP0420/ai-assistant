@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas AI | Self-Learning Personal Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="logo-text">Atlas AI</div>
+                </div>
+                
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Learning Mode Active</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="quick-actions">
+                    <div class="action-btn" onclick="openWhatsAppModal()">
+                        <div class="action-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <span>WhatsApp</span>
+                    </div>
+                    
+                    <div class="action-btn" onclick="openReminderModal()">
+                        <div class="action-icon">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <span>Reminder</span>
+                    </div>
+                    
+                    <div class="action-btn" onclick="openTaskModal()">
+                        <div class="action-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <span>New Task</span>
+                    </div>
+                    
+                    <div class="action-btn" onclick="startVoiceCommand()">
+                        <div class="action-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <span>Voice Cmd</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-users"></i>
+                        Frequent Contacts
+                    </h3>
+                    <ul class="contacts-list" id="contactsList">
+                        <!-- Contacts will be populated here -->
+                    </ul>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-bolt"></i>
+                        Quick Tasks
+                    </h3>
+                    <div class="quick-tasks">
+                        <button class="input-action" onclick="quickTask('weather')">
+                            <i class="fas fa-cloud-sun"></i> Weather
+                        </button>
+                        <button class="input-action" onclick="quickTask('news')">
+                            <i class="fas fa-newspaper"></i> Latest News
+                        </button>
+                        <button class="input-action" onclick="quickTask('schedule')">
+                            <i class="fas fa-calendar"></i> Today's Schedule
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Chat Container -->
+            <main class="chat-container">
+                <div class="chat-header">
+                    <div>
+                        <h1 class="chat-title">Atlas AI Assistant</h1>
+                        <p class="chat-subtitle">I learn from every conversation. Try saying: "Send WhatsApp to John" or "Remind me to call mom"</p>
+                    </div>
+                    
+                    <div class="voice-controls">
+                        <button class="voice-btn" id="voiceBtn" onclick="toggleVoiceRecording()">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                        <div id="voiceStatus">Click to speak</div>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will appear here -->
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="input-wrapper">
+                        <textarea class="chat-input" id="chatInput" placeholder="Type your message or instruction... (e.g., 'Send WhatsApp to Sarah: Meeting at 3 PM')"></textarea>
+                        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="input-actions">
+                        <button class="input-action" onclick="openLearningModal()">
+                            <i class="fas fa-graduation-cap"></i> Teach Me
+                        </button>
+                        <button class="input-action" onclick="openSettingsModal()">
+                            <i class="fas fa-cog"></i> Settings
+                        </button>
+                        <button class="input-action" onclick="clearChat()">
+                            <i class="fas fa-trash"></i> Clear Chat
+                        </button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Learning Panel -->
+            <aside class="learning-panel">
+                <div class="learning-header">
+                    <h2 class="learning-title">
+                        <i class="fas fa-brain"></i>
+                        AI Knowledge Base
+                    </h2>
+                    <span class="badge">Learning Active</span>
+                </div>
+                
+                <div class="knowledge-progress">
+                    <div class="progress-label">
+                        <span>Learning Progress</span>
+                        <span id="progressPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="learningProgress"></div>
+                    </div>
+                </div>
+                
+                <h3 class="section-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Recently Learned
+                </h3>
+                <ul class="knowledge-list" id="knowledgeList">
+                    <!-- Learned items will appear here -->
+                </ul>
+                
+                <h3 class="section-title">
+                    <i class="fas fa-bell"></i>
+                    Upcoming Reminders
+                </h3>
+                <ul class="reminders-list" id="remindersList">
+                    <!-- Reminders will appear here -->
+                </ul>
+            </aside>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>Atlas AI | Self-Learning Personal Assistant | v2.5.1</p>
+                <p>Voice recognition active • Learning mode: ON • Last updated: Just now</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- WhatsApp Modal -->
+    <div class="modal" id="whatsappModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Send WhatsApp Message</h2>
+                <button class="close-modal" onclick="closeModal('whatsappModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Select Contact</label>
+                <select class="form-input" id="whatsappContact">
+                    <option value="john">John Doe (Favorite)</option>
+                    <option value="sarah">Sarah Smith (Work)</option>
+                    <option value="mike">Mike Johnson</option>
+                    <option value="emily">Emily Davis (Family)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea class="form-input" id="whatsappMessage" rows="4" placeholder="Type your message..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Schedule Send</label>
+                <input type="datetime-local" class="form-input" id="whatsappSchedule">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('whatsappModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="sendWhatsApp()">Send Message</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reminder Modal -->
+    <div class="modal" id="reminderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Set Reminder</h2>
+                <button class="close-modal" onclick="closeModal('reminderModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Reminder Title</label>
+                <input type="text" class="form-input" id="reminderTitle" placeholder="e.g., Call doctor">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-input" id="reminderDesc" rows="3" placeholder="Additional details..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Date & Time</label>
+                <input type="datetime-local" class="form-input" id="reminderTime">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Repeat</label>
+                <select class="form-input" id="reminderRepeat">
+                    <option value="none">Never</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('reminderModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="setReminder()">Set Reminder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Modal -->
+    <div class="modal" id="learningModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Teach Atlas AI</h2>
+                <button class="close-modal" onclick="closeModal('learningModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">What should I learn?</label>
+                <textarea class="form-input" id="learningInput" rows="4" placeholder="e.g., When I say 'prepare my meeting notes', it means create a summary of yesterday's meeting and email it to my team"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-input" id="learningCategory">
+                    <option value="command">New Command</option>
+                    <option value="preference">Personal Preference</option>
+                    <option value="contact">Contact Information</option>
+                    <option value="routine">Daily Routine</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Priority</label>
+                <select class="form-input" id="learningPriority">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('learningModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveLearning()">Save to Memory</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">AI Assistant Settings</h2>
+                <button class="close-modal" onclick="closeModal('settingsModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Assistant Name</label>
+                <input type="text" class="form-input" id="assistantName" value="Atlas AI">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Learning Sensitivity</label>
+                <select class="form-input" id="learningSensitivity">
+                    <option value="low">Low (Learn only when taught)</option>
+                    <option value="medium" selected>Medium (Learn from patterns)</option>
+                    <option value="high">High (Learn from everything)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Voice Response</label>
+                <select class="form-input" id="voiceResponse">
+                    <option value="on">Enabled</option>
+                    <option value="off">Disabled</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Theme</label>
+                <select class="form-input" id="themeSelect">
+                    <option value="dark">Dark (Default)</option>
+                    <option value="light">Light</option>
+                    <option value="auto">Auto (System)</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="resetSettings()">Reset to Default</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
